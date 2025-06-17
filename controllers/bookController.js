@@ -1,8 +1,21 @@
-import { json } from "express";
+
 import { BookModel } from "../models/bookModel.js";
+import { decodeJWt } from "../utils/generateToken.js";
 
 export const getBooksController = async (req, res) => {
   try {
+
+    const jwtToken = req?.body?.token;
+
+
+    const foundUser = await decodeJWt(jwtToken);
+    console.log(foundUser)
+    if (!foundUser) {
+      return res.json({
+        success: false,
+        message: "You are not authorized!!",
+      })
+    }
     const books = await BookModel.find();
 
     res.json({
