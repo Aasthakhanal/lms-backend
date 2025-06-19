@@ -13,7 +13,14 @@ export const registerUser = async (req, res) => {
         message: `User with email ${reqBody.email} already exists`,
       });
     }
-    const newUser = await UserModel.create(reqBody);
+    const newUserInfo = {
+      name: reqBody.name,
+      email: reqBody.email,
+      password: reqBody.password,
+      address: reqBody.address,
+      phoneNumber: reqBody.phoneNumber,
+    };
+    const newUser = await UserModel.create(newUserInfo);
     return res.json({
       success: true,
       data: newUser,
@@ -43,7 +50,7 @@ export const loginUser = async (req, res) => {
     if (isPasswordMatched) {
       const token = await generateToken({ _id: foundUser?._id });
       if (!token) {
-        res.json({
+        return res.json({
           success: false,
           message: "Something Went Wrong!!!",
         });
@@ -54,7 +61,7 @@ export const loginUser = async (req, res) => {
         email: foundUser.email,
         address: foundUser.address,
         phoneNumber: foundUser.phoneNumber,
-        token,
+        token: token,
       };
       return res.json({
         success: true,

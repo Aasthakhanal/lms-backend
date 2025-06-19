@@ -10,7 +10,7 @@ try {
 
 } catch (error) {
     console.log(error);
-    return error;
+    return;
 }
 }
 export const decodeJWt = async(token) => {
