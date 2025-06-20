@@ -1,9 +1,16 @@
-import { UserModel } from "../models/userModel.js";
+import { UserModel, validateUserSchema } from "../models/userModel.js";
 import { generateToken } from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
   try {
     const reqBody = req.body;
+    const validateUser =  validateUserSchema.validate(reqBody);
+    if( validateUser.error ) {
+      return res.json({
+        success: false,
+        message: validateUser.error.message,
+      });
+    }
     const ifUsersEmailAlreadyExists = await UserModel.find({
       email: reqBody.email,
     });
@@ -20,7 +27,7 @@ export const registerUser = async (req, res) => {
       address: reqBody.address,
       phoneNumber: reqBody.phoneNumber,
     };
-    const newUser = await UserModel.create(newUserInfo);
+    const newUser = await UserModel.create(validateUser.value);
     return res.json({
       success: true,
       data: newUser,
@@ -80,3 +87,4 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+                                                                                                                                                                                                                                     
