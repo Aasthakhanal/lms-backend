@@ -1,7 +1,8 @@
 import express from "express";
 import { connectToDB } from "./config/db.js";
 import bookRouter from "./routes/bookRoutes.js";
-import authRoutes from "./routes/userRoutes.js"
+import userRoutes from "./routes/userRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 
 
 const app = express();
@@ -33,8 +34,8 @@ app.post("/api/books/create", (req, res) => {
 });
 
 app.use("/api/books", bookRouter);
-app.use("/api/auth", authRoutes)
-// app.use("api/users", userRoutes);
+app.use("/api/auth", userRoutes)
+app.use("/api/transactions", transactionRoutes);
 
 app.listen(port, () => {
   console.log(`Server runnning on port ${port}`);
