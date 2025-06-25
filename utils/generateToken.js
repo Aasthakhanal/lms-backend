@@ -14,7 +14,7 @@ try {
 }
 export const decodeJWt = async(token) => {
     try {
-        const decoded = jwt.verify(token, jwtSecretKey);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         if(!decoded && !decoded._id){
             console.log("Invalid Token Detected!!")
             return;

@@ -33,7 +33,7 @@ export const createTransaction = async (req, res) => {
       });
     }
 
-    if (!issuedto) {
+    if (!issuedTo) {
       return res.json({
         success: false,
         message: "No book issued if no reader exists!",

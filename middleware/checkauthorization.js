@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { jwtSecretKey } from "../utils/generateToken.js";
 import { UserModel } from "../models/userModel.js";
 
 export const checkauthorization = async (req, res, next) => {

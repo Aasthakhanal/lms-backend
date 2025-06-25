@@ -21,19 +21,6 @@ app.get("/api/test", (req, res) => {
   });
 });
 
-// app.get("/api/books", (req, res) => {
-//   res.json({
-//     success: true,
-//     message: "This is book route",
-//   });
-// });
-
-app.post("/api/books/create", (req, res) => {
-  res.json({
-    success: true,
-    message: "This is book creation route",
-  });
-});
 
 app.use("/api/books", bookRouter);
 app.use("/api/auth", userRoutes)

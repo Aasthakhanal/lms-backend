@@ -1,65 +1,77 @@
 import { UserModel, validateUserSchema } from "../models/userModel.js";
 import { generateToken } from "../utils/generateToken.js";
 
+
 export const registerUser = async (req, res) => {
   try {
     const reqBody = req.body;
-    const validateUser =  validateUserSchema.validate(reqBody);
-    if( validateUser.error ) {
+
+    const validatedUser = validateUserSchema.validate(reqBody);
+    
+    if (validatedUser.error) {
       return res.json({
         success: false,
-        message: validateUser.error.message,
+        message: validatedUser.error.message,
       });
     }
-    const ifUsersEmailAlreadyExists = await UserModel.find({
-      email: reqBody.email,
-    });
-    if (ifUsersEmailAlreadyExists.length > 0) {
+
+    const foundUser = await UserModel.find({ email: reqBody.email });
+
+    if (foundUser.length > 0) {
       return res.json({
         success: false,
-        message: `User with email ${reqBody.email} already exists`,
+        message: `User with email: ${reqBody.email} already exists`,
       });
     }
-    const newUserInfo = {
-      name: reqBody.name,
-      email: reqBody.email,
-      password: reqBody.password,
-      address: reqBody.address,
-      phoneNumber: reqBody.phoneNumber,
-    };
-    const newUser = await UserModel.create(validateUser.value);
+  
+    // const newUserInfo = {
+      //   email: reqBody.email,
+    //   phoneNumber: reqBody.phoneNumber,
+    //   password: reqBody.password,
+    //   address: reqBody.address,
+    //   name: reqBody.name,
+    // };
+
+    const newUser = await UserModel.create(validatedUser.value);
+
     return res.json({
       success: true,
       data: newUser,
-      message: `Dear ${newUser.name}, Welcome to Library Management System`,
+      message: `Dear ${newUser.name}, Welcome to library management system.`,
     });
   } catch (error) {
+    console.log(error);
     res.json({
       success: false,
       message: error.message,
     });
   }
 };
+
 export const loginUser = async (req, res) => {
   try {
     const reqBody = req.body;
 
-    const foundUser = await UserModel.findOne({
-      email: reqBody.email,
-    });
+    const foundUser = await UserModel.findOne({ email: reqBody.email });
+
+    console.log(foundUser);
+
     if (!foundUser) {
-      res.json({
+      return res.json({
         success: false,
-        message: "invalid credentials!!",
+        message: "Invalid Credentials!!!",
       });
     }
+
     const isPasswordMatched = await foundUser.isPasswordValid(reqBody.password);
+
     if (isPasswordMatched) {
       const token = await generateToken({ _id: foundUser?._id });
+
       if (!token) {
         return res.json({
           success: false,
-          message: "Something Went Wrong!!!",
+          message: "Something went wrong!!",
         });
       }
 
@@ -71,23 +83,27 @@ export const loginUser = async (req, res) => {
         phoneNumber: foundUser.phoneNumber,
         token: token,
       };
+
       return res.json({
         success: true,
         data: userData,
         message: `Welcome back ${foundUser.name}`,
       });
     }
+
     res.json({
       success: false,
-      message: "Invalid credentials!!!",
+      message: "Invalid Credentials!!!",
     });
   } catch (error) {
+    console.log(error);
     res.json({
       success: false,
       message: error.message,
     });
   }
 };
+
 export const updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -95,6 +111,14 @@ export const updateUser = async (req, res) => {
     const reqBody = req.body;
 
     const foundUser = await UserModel.findById(userId);
+    if (
+      foundUser._id.toString() !== req.user._id.toString() && !["Admin", "Staff"].includes(req.user.role) 
+    ) {
+      return res.json({
+        success: false,
+        message: "You are not authorized to update this user!!!",
+      });
+    }
 
     if (!foundUser) {
       return res.json({
@@ -148,4 +172,47 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
-                                                                                                                                                                                                                                     
+export const updatePassword = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { newPassword, oldPassword } = req.body;
+    const foundUser = await UserModel.findById(userId);
+
+    if (!foundUser) {
+      return res.json({
+        success: false,
+        message: "User not found!!!",
+      });
+    }
+    const passwordMatched = await foundUser.isPasswordValid(oldPassword);
+    if (!passwordMatched) {
+      return res.json({
+        success: false,
+        message: "Old Password is not matched!!!",
+      });
+    }
+    foundUser.password = newPassword;
+    await foundUser.save();
+    const userData = {
+      name: foundUser.name,
+      address: foundUser.address,
+      phoneNumber: foundUser.phoneNumber,
+      role: foundUser.role,
+      role: foundUser.email,
+      _id: foundUser._id,
+    }
+    res.json({
+      success: true,
+      message: "Password Updated Successfully",
+      data: userData,
+    })
+
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+    
+  }
+}
