@@ -11,7 +11,7 @@ export const checkauthorization = async (req, res, next) => {
         message: "Looks like you have been logged out!",
       });
     }
-    const decoded = await jwt.verify(token, jwtSecretKey);
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     if (!decoded._id) {
       return res.json({

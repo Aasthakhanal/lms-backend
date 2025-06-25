@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/userModel.js';
-export const jwtSecretKey = "jbejfcewbafcoefu";
 
 export const generateToken = async (user) => {
 try {
-    const token = jwt.sign(user, jwtSecretKey);
+    const token = jwt.sign(user, process.env.JWT_SECRET_KEY);
 
     return token;
 
