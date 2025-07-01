@@ -24,6 +24,10 @@ const transactionSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  estimatedReturnDate: {
+    type: Date,
+  },
+
   returnDate: {
     type: Date,
   },
@@ -31,6 +35,10 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Rejected", "Approved"],
     default: "Pending",
+  },
+  returnedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
   },
 });
 

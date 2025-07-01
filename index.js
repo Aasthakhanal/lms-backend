@@ -27,5 +27,11 @@ app.use("/api/auth", userRoutes)
 app.use("/api/transactions", transactionRoutes);
 
 app.listen(port, () => {
+  const f14daysfromNow = Date.now() + 15 * 24* 60 * 60 * 1000;
+  console.log(
+    new Date(f14daysfromNow).toTimeString(),
+    new Date(f14daysfromNow).toDateString(),
+    new Date(f14daysfromNow).toISOString(),
+  );
   console.log(`Server runnning on port ${port}`);
 });

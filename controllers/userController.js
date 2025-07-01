@@ -184,6 +184,16 @@ export const updatePassword = async (req, res) => {
         message: "User not found!!!",
       });
     }
+    if (
+      foundUser._id.toString() !== req.user._id.toString() &&
+      !["Admin", "Staff"].includes(req.user.role)
+    ) {
+      return res.json({
+        success: false,
+        message: "You are not authorized to update the password!!!",
+      });
+    }
+
     const passwordMatched = await foundUser.isPasswordValid(oldPassword);
     if (!passwordMatched) {
       return res.json({

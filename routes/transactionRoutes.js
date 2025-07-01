@@ -4,6 +4,7 @@ import {
   createTransaction,
   deleteTransaction,
   getTransactions,
+  returnBook,
   updateTransaction,
   updateTransactionStatus,
 } from "../controllers/transactionControllers.js";
@@ -25,5 +26,7 @@ router
     updateTransactionStatus
   )
   .delete(checkauthorization, checkStaffLevelPermissions, deleteTransaction);
+
+  router.route("/:transactionId/return").patch(checkauthorization, checkStaffLevelPermissions, returnBook);
 
 export default router;
