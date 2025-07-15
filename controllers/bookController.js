@@ -25,7 +25,7 @@ export const getBooksController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -42,7 +42,7 @@ export const createBookController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -75,7 +75,7 @@ export const updateBookController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -103,7 +103,7 @@ export const deleteBookController = async (req, res) => {
       message: `Book with id: ${bookId} not found`,
     });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });

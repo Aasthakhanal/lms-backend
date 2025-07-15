@@ -5,6 +5,7 @@ import {
   updateUser,
   deleteUser,
   updatePassword,
+  getProfile,
 } from "../controllers/userController.js";
 import { checkauthorization } from "../middleware/checkauthorization.js";
 
@@ -17,4 +18,6 @@ router
   .route("/:userId")
   .put(checkauthorization, updateUser).patch(checkauthorization, updatePassword)
   .delete(checkauthorization, deleteUser);
+
+  router.route("/profile").post(checkauthorization,getProfile);
 export default router;

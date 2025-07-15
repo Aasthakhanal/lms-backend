@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { connectToDB } from "./config/db.js";
 import bookRouter from "./routes/bookRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -12,6 +13,7 @@ const port = 5003;
 
 connectToDB(); 
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/api/test", (req, res) => {

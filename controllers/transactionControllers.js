@@ -14,7 +14,7 @@ export const getTransactions = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -69,7 +69,7 @@ export const createTransaction = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -111,7 +111,7 @@ export const updateTransaction = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -157,7 +157,7 @@ export const updateTransactionStatus = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -192,7 +192,7 @@ export const deleteTransaction = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -222,7 +222,7 @@ export const returnBook = async (req, res) => {
     })
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
