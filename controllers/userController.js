@@ -1,13 +1,13 @@
 import { UserModel, validateUserSchema } from "../models/userModel.js";
 import { generateToken } from "../utils/generateToken.js";
-
+import { sendAuthCookies } from "../utils/sendAuthCookies.js";
 
 export const registerUser = async (req, res) => {
   try {
     const reqBody = req.body;
 
     const validatedUser = validateUserSchema.validate(reqBody);
-    
+
     if (validatedUser.error) {
       return res.json({
         success: false,
@@ -23,9 +23,9 @@ export const registerUser = async (req, res) => {
         message: `User with email: ${reqBody.email} already exists`,
       });
     }
-  
+
     // const newUserInfo = {
-      //   email: reqBody.email,
+    //   email: reqBody.email,
     //   phoneNumber: reqBody.phoneNumber,
     //   password: reqBody.password,
     //   address: reqBody.address,
@@ -41,7 +41,7 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    res.json({
       success: false,
       message: error.message,
     });
@@ -53,8 +53,6 @@ export const loginUser = async (req, res) => {
     const reqBody = req.body;
 
     const foundUser = await UserModel.findOne({ email: reqBody.email });
-
-    console.log(foundUser);
 
     if (!foundUser) {
       return res.json({
@@ -82,7 +80,10 @@ export const loginUser = async (req, res) => {
         address: foundUser.address,
         phoneNumber: foundUser.phoneNumber,
         token: token,
+        role: foundUser.role,
       };
+
+      sendAuthCookies(token, res);
 
       return res.json({
         success: true,
@@ -97,7 +98,7 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    res.json({
       success: false,
       message: error.message,
     });
@@ -111,14 +112,6 @@ export const updateUser = async (req, res) => {
     const reqBody = req.body;
 
     const foundUser = await UserModel.findById(userId);
-    if (
-      foundUser._id.toString() !== req.user._id.toString() && !["Admin", "Staff"].includes(req.user.role) 
-    ) {
-      return res.json({
-        success: false,
-        message: "You are not authorized to update this user!!!",
-      });
-    }
 
     if (!foundUser) {
       return res.json({
@@ -126,6 +119,26 @@ export const updateUser = async (req, res) => {
         message: "User not found!!!",
       });
     }
+
+    if (
+      foundUser._id.toString() !== req.user._id.toString() &&
+      !["Admin", "Staff"].includes(req.user.role)
+    ) {
+      return res.json({
+        success: false,
+        message: "You cannot update this user!",
+      });
+    }
+    // if (
+    //   foundUser._id.toString() !== req.user._id.toString() &&
+    //   req.user.role !== "Admin" &&
+    //   req.user.role !== "Staff"
+    // ) {
+    //   return res.json({
+    //     success: false,
+    //     message: "You cannot update this user!",
+    //   });
+    // }
 
     const updatedUser = await UserModel.findByIdAndUpdate(userId, reqBody, {
       new: true,
@@ -138,7 +151,7 @@ export const updateUser = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    res.json({
       success: false,
       message: error.message,
     });
@@ -172,10 +185,19 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
 export const updatePassword = async (req, res) => {
   try {
     const { userId } = req.params;
     const { newPassword, oldPassword } = req.body;
+
+    if (!newPassword || !oldPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all fields!",
+      });
+    }
+
     const foundUser = await UserModel.findById(userId);
 
     if (!foundUser) {
@@ -184,52 +206,57 @@ export const updatePassword = async (req, res) => {
         message: "User not found!!!",
       });
     }
+
     if (
       foundUser._id.toString() !== req.user._id.toString() &&
       !["Admin", "Staff"].includes(req.user.role)
     ) {
       return res.json({
         success: false,
-        message: "You are not authorized to update the password!!!",
+        message: "You cannot password of this user!",
       });
     }
 
     const passwordMatched = await foundUser.isPasswordValid(oldPassword);
+
     if (!passwordMatched) {
       return res.json({
         success: false,
-        message: "Old Password is not matched!!!",
+        message: "Old Password doesnot match!!!",
       });
     }
+
     foundUser.password = newPassword;
+
     await foundUser.save();
+
     const userData = {
       name: foundUser.name,
       address: foundUser.address,
       phoneNumber: foundUser.phoneNumber,
       role: foundUser.role,
-      role: foundUser.email,
+      email: foundUser.email,
       _id: foundUser._id,
-    }
+    };
+
     res.json({
       success: true,
       message: "Password Updated Successfully",
       data: userData,
-    })
-
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    res.json({
       success: false,
       message: error.message,
     });
-    
   }
-}
+};
 
 export const getProfile = async (req, res) => {
   try {
-    const user = req.user.toObject();
+    let user = req.user.toObject();
+
     delete user.password;
 
     res.status(200).json({
@@ -240,6 +267,50 @@ export const getProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error,
-    })
+    });
   }
-}
+};
+
+export const updateRole = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const existingUser = await UserModel.findById(userId);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Cant find user with requested id!",
+      });
+    }
+
+    if (existingUser.role === "Admin") {
+      return res.status(400).json({
+        success: false,
+        message: "Cant find update role of admin!",
+      });
+    }
+
+    if (existingUser.role === "Member") {
+      existingUser.role = "Staff";
+    } else if (existingUser.role === "Staff") {
+      existingUser.role = "Member";
+    }
+
+    await existingUser.save();
+
+    // remove password from user details here;
+
+    return res.status(201).json({
+      success: true,
+      data: existingUser,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

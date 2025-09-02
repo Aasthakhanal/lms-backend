@@ -1,5 +1,5 @@
 import express from "express";
-import { checkauthorization } from "../middleware/checkauthorization.js";
+import { checkAuthorization } from "../middleware/checkAuthorization.js";
 import {
   createTransaction,
   deleteTransaction,
@@ -14,19 +14,21 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(checkauthorization, createTransaction)
-  .get(getTransactions);
+  .post(checkAuthorization, createTransaction)
+  .get(checkAuthorization, getTransactions);
 
 router
   .route("/:transactionId")
-  .put(checkauthorization, checkStaffLevelPermissions, updateTransaction)
+  .put(checkAuthorization, checkStaffLevelPermissions, updateTransaction)
   .patch(
-    checkauthorization,
+    checkAuthorization,
     checkStaffLevelPermissions,
     updateTransactionStatus
   )
-  .delete(checkauthorization, checkStaffLevelPermissions, deleteTransaction);
+  .delete(checkAuthorization, checkStaffLevelPermissions, deleteTransaction);
 
-  router.route("/:transactionId/return").patch(checkauthorization, checkStaffLevelPermissions, returnBook);
+router
+  .route("/:transactionId/return")
+  .patch(checkAuthorization, checkStaffLevelPermissions, returnBook);
 
 export default router;

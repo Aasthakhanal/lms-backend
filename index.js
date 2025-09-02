@@ -4,36 +4,49 @@ import { connectToDB } from "./config/db.js";
 import bookRouter from "./routes/bookRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
-import dotenv from "dotenv";
+import memberRoutes from "./routes/memberRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 const app = express();
+
 dotenv.config();
+
 const port = 5003;
 
-connectToDB(); 
+connectToDB();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 app.use(express.json());
 
-app.get("/api/test", (req, res) => {
+app.get("api/test", (req, res) => {
   res.json({
     success: true,
-    message: "Hello World!",
+    message: "This is test route!",
   });
 });
 
+app.use("/api/auth", userRoutes);
 
 app.use("/api/books", bookRouter);
-app.use("/api/auth", userRoutes)
+
 app.use("/api/transactions", transactionRoutes);
 
+app.use("/api/members", memberRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
+
 app.listen(port, () => {
-  const f14daysfromNow = Date.now() + 15 * 24* 60 * 60 * 1000;
-  console.log(
-    new Date(f14daysfromNow).toTimeString(),
-    new Date(f14daysfromNow).toDateString(),
-    new Date(f14daysfromNow).toISOString(),
-  );
-  console.log(`Server runnning on port ${port}`);
+  console.log(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString());
+
+  console.log(`Server running on ${port}`);
 });

@@ -6,18 +6,21 @@ import {
   deleteUser,
   updatePassword,
   getProfile,
-} from "../controllers/userController.js";
-import { checkauthorization } from "../middleware/checkauthorization.js";
+} from "../controllers/userControllers.js";
+import { checkAuthorization } from "../middleware/checkAuthorization.js";
 
 const router = express.Router();
 
-router.route('/register').post(registerUser);
-router.route('/login').post(loginUser);
+router.route("/register").post(registerUser);
+
+router.route("/login").post(loginUser);
 
 router
   .route("/:userId")
-  .put(checkauthorization, updateUser).patch(checkauthorization, updatePassword)
-  .delete(checkauthorization, deleteUser);
+  .put(checkAuthorization, updateUser)
+  .patch(checkAuthorization, updatePassword)
+  .delete(checkAuthorization, deleteUser);
 
-  router.route("/profile").post(checkauthorization,getProfile);
+router.route("/profile").get(checkAuthorization, getProfile);
+
 export default router;
